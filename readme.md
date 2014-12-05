@@ -27,7 +27,9 @@ Describe some function
 
 And use it
 
-	fetch('/user').bind(JSON.parse).bind(output);
+	fetch('/user')
+		.bind(JSON.parse)
+		.bind(output);
 
 ## License
 
