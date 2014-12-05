@@ -19,11 +19,19 @@ function Future(action){
 }
 
 function Resolve(value){
-	// body...
+	return {
+		bind: function(resolve){
+
+		}
+	};
 }
 
 function Reject(value){
-	// body...
+	return {
+		bind: function(_, reject){
+
+		}
+	};
 }
 
 Future.Resolve = Resolve;
