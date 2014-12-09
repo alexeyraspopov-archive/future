@@ -1,39 +1,54 @@
-function Future(action){
-	var subscribers = [], value;
+'use strict';
+
+function isUnit(value){
+	return value && value.bind;
+}
+
+function resolveChain(pending, data){
+	pending.forEach(function(pair){
+		pair.unit.resolve(pair.morphism(data));
+	});
+}
+
+function pendingUnit(action){
+	var pending = [];
 
 	function resolve(data){
-		// body...
+		return isUnit(data) ? data.bind(resolve) : resolveChain(pending, data);
 	}
 
-	function reject(error){
-		// body...
-	}
+	return { bind: function(morphism){
+		var u = pendingUnit();
 
-	// action(resolve, reject);
+		pending.push({ unit: u, morphism: morphism });
 
-	return {
-		bind: function(){
-
+		if(action){
+			action(resolve);
 		}
-	}
+
+		return u;
+	}, resolve: resolve };
 }
 
-function Resolve(value){
-	return {
-		bind: function(resolve){
-
-		}
-	};
+function Future(action){
+	return pendingUnit(action);
 }
 
-function Reject(value){
-	return {
-		bind: function(_, reject){
+/*Future(function(resolve){
+	setTimeout(function(){
+		resolve(13);
+	}, 1000);
+})
+	.bind(function(a){ return a + 1; })
+	.bind(function(a){ console.log(a); return a; })
+	.bind(function(a){
+		return Future(function(resolve){
+			setTimeout(function(){
+				resolve(a * 2);
+			}, 1000);
+		});
+	})
+	.bind(function(a){ return a + 1; })
+	.bind(function(a){ console.log(a); return a; });*/
 
-		}
-	};
-}
-
-Future.Resolve = Resolve;
-Future.Reject = Reject;
-exports.Future = Future;
+module.exports = Future;
