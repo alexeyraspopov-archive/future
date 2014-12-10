@@ -6,7 +6,13 @@ function isUnit(value){
 
 function resolveChain(pending, data){
 	pending.forEach(function(pair){
-		pair.unit.resolve(pair.morphism(data));
+		pair.unit.resolve(pair.resolving(data));
+	});
+}
+
+function rejectChain(pending, data){
+	pending.forEach(function(pair){
+		pair.unit.reject(pair.rejecting(data));
 	});
 }
 
@@ -17,38 +23,25 @@ function pendingUnit(action){
 		return isUnit(data) ? data.bind(resolve) : resolveChain(pending, data);
 	}
 
-	return { bind: function(morphism){
+	function reject(data){
+		return isUnit(data) ? data.bind(reject) : rejectChain(pending, data);
+	}
+
+	return { bind: function(resolving, rejecting){
 		var u = pendingUnit();
 
-		pending.push({ unit: u, morphism: morphism });
+		pending.push({ unit: u, resolving: resolving, rejecting: rejecting });
 
 		if(action){
-			action(resolve);
+			action(resolve, reject);
 		}
 
 		return u;
-	}, resolve: resolve };
+	}, resolve: resolve, reject: reject };
 }
 
 function Future(action){
 	return pendingUnit(action);
 }
-
-/*Future(function(resolve){
-	setTimeout(function(){
-		resolve(13);
-	}, 1000);
-})
-	.bind(function(a){ return a + 1; })
-	.bind(function(a){ console.log(a); return a; })
-	.bind(function(a){
-		return Future(function(resolve){
-			setTimeout(function(){
-				resolve(a * 2);
-			}, 1000);
-		});
-	})
-	.bind(function(a){ return a + 1; })
-	.bind(function(a){ console.log(a); return a; });*/
 
 module.exports = Future;
