@@ -28,15 +28,15 @@ function pendingUnit(action){
 	}
 
 	return { bind: function(resolving, rejecting){
-		var u = pendingUnit();
+		var unit = pendingUnit();
 
-		pending.push({ unit: u, resolving: resolving, rejecting: rejecting });
+		pending.push({ unit: unit, resolving: resolving, rejecting: rejecting });
 
 		if(action){
 			action(resolve, reject);
 		}
 
-		return u;
+		return unit;
 	}, resolve: resolve, reject: reject };
 }
 
